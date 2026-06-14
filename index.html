@@ -5,100 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
 <title>Mark Six 六合彩 · 5th-Gen 3D Draw Machine</title>
 <style>
-  :root{
-    --gold:#d4af37; --gold2:#f0d77a; --charcoal:#0a0d16; --ink:#05070d;
-    --red:#e5342b; --blue:#2356b0; --green:#2e9e4f;
-    color-scheme: dark;
-  }
+  :root{ --gold:#d4af37; --gold2:#f0d77a; --ink:#05070d;
+    --red:#e5342b; --blue:#2356b0; --green:#2e9e4f; color-scheme:dark; }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);
     font-family:"Segoe UI","Helvetica Neue",system-ui,"Microsoft JhengHei",sans-serif;color:#fff}
-  #app{position:fixed;inset:0}
-  canvas{display:block}
+  #app{position:fixed;inset:0} canvas{display:block}
 
-  /* ---- top-left brand ---- */
   #brand{position:fixed;top:22px;left:26px;pointer-events:none;z-index:5}
-  #brand .en{font-weight:800;letter-spacing:.14em;font-size:15px;color:#fff;opacity:.92}
-  #brand .zh{font-weight:800;font-size:34px;line-height:1;letter-spacing:.06em;
+  #brand .en{font-weight:800;letter-spacing:.14em;font-size:14px;color:#fff;opacity:.9}
+  #brand .zh{font-weight:800;font-size:32px;line-height:1.05;letter-spacing:.06em;
     background:linear-gradient(180deg,#fff,#cfe0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-  #brand .sub{margin-top:6px;font-size:11px;letter-spacing:.22em;color:var(--gold2);opacity:.85;text-transform:uppercase}
+  #brand .sub{margin-top:5px;font-size:11px;letter-spacing:.22em;color:var(--gold2);opacity:.85;text-transform:uppercase}
   #brand .fifty{display:inline-block;margin-top:8px;font-size:10px;letter-spacing:.18em;
     border:1px solid rgba(212,175,55,.5);color:var(--gold2);padding:3px 8px;border-radius:20px;opacity:.9}
 
-  /* ---- result HUD ---- */
-  #result{position:fixed;top:22px;right:24px;z-index:5;width:212px;
+  #result{position:fixed;top:22px;right:24px;z-index:5;width:214px;
     background:rgba(10,13,22,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:16px 16px 18px;
-    box-shadow:0 18px 50px rgba(0,0,0,.5);opacity:0;transform:translateY(-8px);
-    transition:opacity .5s ease,transform .5s ease}
+    box-shadow:0 18px 50px rgba(0,0,0,.5);opacity:0;transform:translateY(-8px);transition:opacity .5s,transform .5s}
   #result.show{opacity:1;transform:none}
   #result h3{font-size:11px;letter-spacing:.2em;color:var(--gold2);text-transform:uppercase;margin-bottom:12px;font-weight:700}
   #result .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   .chip{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:13px;position:relative;flex:0 0 auto;
-    box-shadow:inset 0 -5px 9px rgba(0,0,0,.35),inset 0 4px 7px rgba(255,255,255,.45),0 3px 7px rgba(0,0,0,.4)}
-  .chip span{width:24px;height:24px;border-radius:50%;background:#fbfaf6;display:flex;align-items:center;
-    justify-content:center;color:#1a1a1a;font-size:12px;font-weight:800}
-  .chip.red{background:radial-gradient(circle at 35% 28%,#ff7a6e,var(--red) 62%)}
-  .chip.blue{background:radial-gradient(circle at 35% 28%,#6ea2ee,var(--blue) 62%)}
-  .chip.green{background:radial-gradient(circle at 35% 28%,#76d99a,var(--green) 62%)}
-  #result .plus{color:var(--gold2);font-weight:800;font-size:20px;margin:0 1px}
-  #result .lbl{width:100%;font-size:10px;letter-spacing:.16em;color:#8da0c4;text-transform:uppercase;margin:14px 0 8px}
+    font-weight:800;font-size:14px;color:#fff;position:relative;flex:0 0 auto;text-shadow:0 1px 2px rgba(0,0,0,.5);
+    box-shadow:inset 0 -5px 9px rgba(0,0,0,.4),inset 0 5px 7px rgba(255,255,255,.35),0 3px 7px rgba(0,0,0,.45)}
+  .chip u{text-decoration:none;border-bottom:2px solid rgba(255,255,255,.85);line-height:.9;padding-bottom:1px}
+  .chip.red{background:radial-gradient(circle at 36% 30%,#f06a60,var(--red) 70%)}
+  .chip.blue{background:radial-gradient(circle at 36% 30%,#5a8de0,var(--blue) 70%)}
+  .chip.green{background:radial-gradient(circle at 36% 30%,#62c987,var(--green) 70%)}
+  #result .lbl{width:100%;font-size:10px;letter-spacing:.14em;color:#8da0c4;text-transform:uppercase;margin:14px 0 8px}
 
-  /* ---- bottom controls ---- */
-  #controls{position:fixed;left:0;right:0;bottom:26px;display:flex;gap:14px;justify-content:center;
-    align-items:center;z-index:5}
-  .btn{pointer-events:auto;font:700 15px/1 "Segoe UI",sans-serif;letter-spacing:.12em;cursor:pointer;
-    border:0;border-radius:999px;padding:16px 30px;color:#1a1206;text-transform:uppercase;
-    background:linear-gradient(180deg,var(--gold2),var(--gold));
-    box-shadow:0 10px 28px rgba(212,175,55,.35),inset 0 1px 0 rgba(255,255,255,.6);
-    transition:transform .12s ease,filter .2s ease,opacity .2s}
-  .btn:hover{filter:brightness(1.07)}
-  .btn:active{transform:translateY(2px) scale(.98)}
+  #controls{position:fixed;left:0;right:0;bottom:26px;display:flex;gap:14px;justify-content:center;align-items:center;z-index:5}
+  .btn{pointer-events:auto;font:700 15px/1 "Segoe UI",sans-serif;letter-spacing:.12em;cursor:pointer;border:0;border-radius:999px;
+    padding:16px 30px;color:#1a1206;text-transform:uppercase;background:linear-gradient(180deg,var(--gold2),var(--gold));
+    box-shadow:0 10px 28px rgba(212,175,55,.35),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .12s,filter .2s,opacity .2s}
+  .btn:hover{filter:brightness(1.07)} .btn:active{transform:translateY(2px) scale(.98)}
   .btn[disabled]{opacity:.45;cursor:not-allowed;filter:saturate(.4)}
-  .btn.ghost{background:rgba(255,255,255,.06);color:#dfe6f5;border:1px solid rgba(255,255,255,.16);
-    box-shadow:none;padding:14px 20px;font-size:12px}
+  .btn.ghost{background:rgba(255,255,255,.06);color:#dfe6f5;border:1px solid rgba(255,255,255,.16);box-shadow:none;padding:14px 20px;font-size:12px}
 
-  /* ---- scene controls panel ---- */
   #scenebtn{position:fixed;left:24px;bottom:92px;z-index:6}
-  #panel{position:fixed;left:24px;bottom:142px;z-index:7;width:252px;
-    background:rgba(9,12,20,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-    border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:15px 18px 17px;
-    box-shadow:0 18px 50px rgba(0,0,0,.55);opacity:0;transform:translateY(10px);pointer-events:none;
-    transition:opacity .25s ease,transform .25s ease}
+  #panel{position:fixed;left:24px;bottom:142px;z-index:7;width:256px;background:rgba(9,12,20,.72);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);border-radius:18px;
+    padding:15px 18px 17px;box-shadow:0 18px 50px rgba(0,0,0,.55);opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s,transform .25s}
   #panel.show{opacity:1;transform:none;pointer-events:auto}
-  #panel h3{font-size:11px;letter-spacing:.2em;color:var(--gold2);text-transform:uppercase;font-weight:700;
-    margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
-  #panel h3 span{cursor:pointer;opacity:.6;font-size:13px}
-  #panel h3 span:hover{opacity:1}
+  #panel h3{font-size:11px;letter-spacing:.2em;color:var(--gold2);text-transform:uppercase;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+  #panel h3 span{cursor:pointer;opacity:.6;font-size:13px} #panel h3 span:hover{opacity:1}
   .ctl{margin-bottom:11px}
   .ctl label{display:flex;justify-content:space-between;font-size:11px;color:#c4d2ee;margin-bottom:5px;letter-spacing:.03em}
   .ctl label b{color:var(--gold2);font-weight:700;font-variant-numeric:tabular-nums}
   .ctl input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;cursor:pointer;
     background:linear-gradient(90deg,var(--gold) var(--p,50%),rgba(255,255,255,.14) var(--p,50%))}
-  .ctl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
-    background:#fff;border:2px solid var(--gold);box-shadow:0 2px 6px rgba(0,0,0,.5)}
+  .ctl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid var(--gold);box-shadow:0 2px 6px rgba(0,0,0,.5)}
   .ctl input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid var(--gold)}
-  #resetScene{margin-top:6px;width:100%;font-size:11px;letter-spacing:.06em;padding:9px;border-radius:10px;cursor:pointer;
-    background:rgba(255,255,255,.06);color:#dfe6f5;border:1px solid rgba(255,255,255,.16)}
+  #resetScene{margin-top:6px;width:100%;font-size:11px;letter-spacing:.06em;padding:9px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.06);color:#dfe6f5;border:1px solid rgba(255,255,255,.16)}
   #resetScene:hover{background:rgba(255,255,255,.12)}
 
-  /* ---- loading ---- */
-  #load{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;gap:18px;align-items:center;
-    justify-content:center;background:radial-gradient(circle at 50% 40%,#0e1530,#05070d 70%);transition:opacity .7s ease}
+  #hint{position:fixed;left:0;right:0;bottom:88px;text-align:center;font-size:11px;letter-spacing:.14em;color:#7e90b4;z-index:4;pointer-events:none;opacity:.85}
+  #disc{position:fixed;left:0;right:0;bottom:6px;text-align:center;font-size:9px;letter-spacing:.08em;color:#5a6884;z-index:4;pointer-events:none;opacity:.55}
+  #load{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#0e1530,#05070d 70%);transition:opacity .7s}
   #load.hide{opacity:0;pointer-events:none}
-  #load .ring{width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.12);
-    border-top-color:var(--gold2);animation:spin 1s linear infinite}
+  #load .ring{width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--gold2);animation:spin 1s linear infinite}
   #load .t{font-size:12px;letter-spacing:.26em;color:var(--gold2);text-transform:uppercase}
   @keyframes spin{to{transform:rotate(360deg)}}
-  #hint{position:fixed;left:0;right:0;bottom:88px;text-align:center;font-size:11px;letter-spacing:.14em;
-    color:#7e90b4;z-index:4;pointer-events:none;opacity:.8}
-  #disc{position:fixed;left:0;right:0;bottom:6px;text-align:center;font-size:9px;letter-spacing:.08em;
-    color:#5a6884;z-index:4;pointer-events:none;opacity:.55}
-  @media (max-width:640px){
-    #result{display:none}
-    #brand .zh{font-size:26px}
-  }
+  @media (max-width:640px){ #result{display:none} #brand .zh{font-size:25px} }
 </style>
 </head>
 <body>
@@ -107,19 +77,19 @@
 <div id="brand">
   <div class="en">THE HONG KONG JOCKEY CLUB</div>
   <div class="zh">六合彩 · MARK SIX</div>
-  <div class="sub">5th-Generation Draw Machine</div><br>
+  <div class="sub">5th-Generation Draw Machine · Smartplay</div><br>
   <div class="fifty">★ 50th Anniversary · 金禧</div>
 </div>
 
 <div id="result">
   <h3>Draw Result</h3>
-  <div class="lbl">Drawn Numbers</div>
+  <div class="lbl">正獎 · Drawn Numbers</div>
   <div class="row" id="r-main"></div>
-  <div class="lbl">Extra Number</div>
+  <div class="lbl">特別號碼 · Extra Number</div>
   <div class="row" id="r-extra"></div>
 </div>
 
-<div id="hint">drag to orbit · scroll to zoom</div>
+<div id="hint">press START DRAW · drag to orbit</div>
 <div id="disc">Unofficial fan-made 3D simulation · not affiliated with The Hong Kong Jockey Club · for entertainment &amp; educational use only</div>
 
 <button class="btn ghost" id="scenebtn">⚙ SCENE</button>
@@ -128,6 +98,7 @@
   <div id="panelBody"></div>
   <button id="resetScene">↺ Reset look</button>
 </div>
+
 <div id="controls">
   <button class="btn ghost" id="sound">♪ SOUND ON</button>
   <button class="btn" id="draw">START DRAW</button>
@@ -156,556 +127,316 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import * as CANNON from 'cannon-es';
 
-/* ============================================================
-   MARK SIX — official 49-ball colour table (verified, 17/16/16)
-   ============================================================ */
-const RED   = [1,2,7,8,12,13,18,19,23,24,29,30,34,35,40,45,46];
-const BLUE  = [3,4,9,10,14,15,20,25,26,31,36,37,41,42,47,48];
-const GREEN = [5,6,11,16,17,21,22,27,28,32,33,38,39,43,44,49];
-const HEX = { red:'#e5342b', blue:'#2356b0', green:'#2e9e4f' };
-const colourOf = n => RED.includes(n) ? 'red' : BLUE.includes(n) ? 'blue' : 'green';
+/* ===== Official 49-ball colour table (verified 17/16/16) ===== */
+const RED=[1,2,7,8,12,13,18,19,23,24,29,30,34,35,40,45,46];
+const BLUE=[3,4,9,10,14,15,20,25,26,31,36,37,41,42,47,48];
+const GREEN=[5,6,11,16,17,21,22,27,28,32,33,38,39,43,44,49];
+const HEX={red:'#e5342b',blue:'#2356b0',green:'#2e9e4f'};
+const colourOf=n=>RED.includes(n)?'red':BLUE.includes(n)?'blue':'green';
 
-/* live, user-adjustable scene look (driven by the Scene Controls panel) */
-const settings = {
-  glow:        0.14,   // bloom strength
-  glowSpread:  0.5,    // bloom radius
-  glowThreshold:0.94,  // only pixels brighter than this bloom
-  rigGlow:     0.7,    // brightness of the lit tubes + horseshoe rig
-  exposure:    0.9,    // overall scene exposure
-  keyLight:    80,     // key spotlight intensity
-  reflections: 1.0     // environment reflection intensity
-};
-const DEFAULTS = { ...settings };
+/* ===== user-adjustable look ===== */
+const settings={ glow:0.14, glowSpread:0.5, glowThreshold:0.94, rigGlow:0.7, exposure:0.9, keyLight:80, reflections:1.0, animSpeed:1.0 };
+const DEFAULTS={...settings};
 
-/* ============================================================
-   Renderer / scene / studio environment
-   ============================================================ */
-const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = settings.exposure;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
-if ('transmissionResolutionScale' in renderer) renderer.transmissionResolutionScale = 0.5; // r184 perf win
+/* ===== renderer / scene / studio env ===== */
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=settings.exposure;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap;
+if('transmissionResolutionScale' in renderer) renderer.transmissionResolutionScale=0.5;
 document.getElementById('app').appendChild(renderer.domElement);
 
-const scene = new THREE.Scene();
-const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-if ('environmentIntensity' in scene) scene.environmentIntensity = settings.reflections;
+const scene=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(renderer);
+scene.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+if('environmentIntensity' in scene) scene.environmentIntensity=settings.reflections;
 
-// dark studio gradient backdrop
-(() => {
-  const c = document.createElement('canvas'); c.width = 32; c.height = 512;
-  const g = c.getContext('2d'); const grd = g.createLinearGradient(0,0,0,512);
-  grd.addColorStop(0,'#10182f'); grd.addColorStop(.45,'#070b18'); grd.addColorStop(1,'#02030a');
-  g.fillStyle = grd; g.fillRect(0,0,32,512);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  scene.background = t;
-})();
+(()=>{ const c=document.createElement('canvas'); c.width=32;c.height=512; const g=c.getContext('2d');
+  const gr=g.createLinearGradient(0,0,0,512); gr.addColorStop(0,'#10182f'); gr.addColorStop(.45,'#070b18'); gr.addColorStop(1,'#02030a');
+  g.fillStyle=gr; g.fillRect(0,0,32,512); const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; scene.background=t; })();
 
-const camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.1, 200);
-camera.position.set(0.3, 3.35, 11.6);
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.dampingFactor = 0.06;
-controls.target.set(0, 2.55, 0);
-controls.minDistance = 5; controls.maxDistance = 18;
-controls.maxPolarAngle = Math.PI * 0.52;
-controls.autoRotate = true; controls.autoRotateSpeed = 0.45;
+const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.1,200);
+camera.position.set(0.8,3.9,14);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.06;
+controls.target.set(0,3.2,0); controls.minDistance=6; controls.maxDistance=24; controls.maxPolarAngle=Math.PI*0.55;
+controls.autoRotate=true; controls.autoRotateSpeed=0.3;
 
-/* ---- lights ---- */
-scene.add(new THREE.HemisphereLight(0xbcd2ff, 0x10131c, 0.55));
-const key = new THREE.SpotLight(0xffffff, settings.keyLight, 42, Math.PI/7, 0.45, 1.3);
-key.position.set(5, 11, 7); key.target.position.set(0,2.4,0); key.castShadow = true;
-key.shadow.mapSize.set(2048,2048); key.shadow.bias = -0.00018; key.shadow.camera.near = 2; key.shadow.camera.far = 30;
-scene.add(key); scene.add(key.target);
-const fill = new THREE.DirectionalLight(0x6f9bff, 1.1); fill.position.set(-7,4,-4); scene.add(fill);
-const rimL = new THREE.PointLight(0xffe6b0, 14, 18, 2); rimL.position.set(-3.4,3.0,2.5); scene.add(rimL);
-const rimR = new THREE.PointLight(0xbfe0ff, 14, 18, 2); rimR.position.set(3.4,3.0,2.5); scene.add(rimR);
+scene.add(new THREE.HemisphereLight(0xbcd2ff,0x10131c,0.55));
+const key=new THREE.SpotLight(0xffffff,settings.keyLight,48,Math.PI/7,0.45,1.3);
+key.position.set(5,13,8); key.target.position.set(0,3.2,0); key.castShadow=true;
+key.shadow.mapSize.set(2048,2048); key.shadow.bias=-0.00018; key.shadow.camera.near=2; key.shadow.camera.far=34;
+scene.add(key,key.target);
+const fill=new THREE.DirectionalLight(0x6f9bff,1.1); fill.position.set(-7,5,-4); scene.add(fill);
+const rimL=new THREE.PointLight(0xffe6b0,14,20,2); rimL.position.set(-3.6,4,2.6); scene.add(rimL);
+const rimR=new THREE.PointLight(0xbfe0ff,14,20,2); rimR.position.set(3.6,4,2.6); scene.add(rimR);
 
-/* ============================================================
-   Studio floor + branded backdrop
-   ============================================================ */
-const floor = new THREE.Mesh(
-  new THREE.CircleGeometry(26, 96),
-  new THREE.MeshStandardMaterial({ color:0x070a12, roughness:0.18, metalness:0.7 })
-);
-floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
-
-// raised circular stage under the machine
-const stage = new THREE.Mesh(
-  new THREE.CylinderGeometry(3.6, 3.9, 0.5, 80),
-  new THREE.MeshStandardMaterial({ color:0x0c1020, roughness:0.34, metalness:0.45 })
-);
-stage.position.y = 0.25; stage.receiveShadow = true; stage.castShadow = true; scene.add(stage);
-const stageTrim = new THREE.Mesh(
-  new THREE.TorusGeometry(3.62, 0.04, 16, 96),
-  new THREE.MeshStandardMaterial({ color:0xd4af37, roughness:0.3, metalness:1, emissive:0x3a2a07, emissiveIntensity:0.6 })
-);
-stageTrim.rotation.x = Math.PI/2; stageTrim.position.y = 0.5; scene.add(stageTrim);
-
-// branded backdrop wall
-(() => {
-  const w = 1024, h = 640, c = document.createElement('canvas'); c.width=w; c.height=h;
-  const g = c.getContext('2d');
-  const grd = g.createRadialGradient(w/2,h*0.42,80, w/2,h*0.42,760);
-  grd.addColorStop(0,'#16203f'); grd.addColorStop(.5,'#0a1126'); grd.addColorStop(1,'#04060d');
-  g.fillStyle = grd; g.fillRect(0,0,w,h);
-  g.globalAlpha = 0.045; g.fillStyle = '#cfe0ff';
-  g.font = '800 42px "Microsoft JhengHei",sans-serif'; g.textAlign='center'; g.textBaseline='middle';
-  for (let r=0;r<6;r++) for (let cI=0;cI<4;cI++){ g.fillText('六合彩 MARK SIX', (cI+0.5)*(w/4), 70 + r*((h-160)/5)); }
-  g.globalAlpha = 0.6; g.fillStyle = '#d4af37';
-  g.font = '800 30px "Segoe UI",sans-serif'; g.fillText('★  50th ANNIVERSARY · 金禧  ★', w/2, h-34);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(44, 27),
-    new THREE.MeshStandardMaterial({ map:t, roughness:0.95, metalness:0 }));
-  wall.position.set(0, 9, -16); scene.add(wall);
-})();
-
-/* ============================================================
-   Materials
-   ============================================================ */
-const matWhiteBody = new THREE.MeshPhysicalMaterial({ color:0xd7dce6, roughness:0.58, metalness:0.1, clearcoat:0.25, clearcoatRoughness:0.4, envMapIntensity:0.6 });
-const matChrome   = new THREE.MeshStandardMaterial({ color:0xd9dee8, roughness:0.22, metalness:1.0, envMapIntensity:1.3 });
-const matDark     = new THREE.MeshStandardMaterial({ color:0x10141f, roughness:0.4, metalness:0.7 });
-const matGold     = new THREE.MeshStandardMaterial({ color:0xd4af37, roughness:0.3, metalness:1.0, emissive:0x3a2a07, emissiveIntensity:0.5 });
-const matGlass    = new THREE.MeshPhysicalMaterial({
-  transmission:1.0, ior:1.46, thickness:0.7, roughness:0.045, metalness:0,
-  clearcoat:1.0, clearcoatRoughness:0.05, envMapIntensity:1.5,
-  attenuationColor:new THREE.Color(0xeaf3ff), attenuationDistance:6,
-  transparent:true, opacity:1, side:THREE.DoubleSide
-});
-matGlass.depthWrite = false;
-// cheap transparent glass for the display tubes (no costly transmission pass)
-const matTubeGlass = new THREE.MeshPhysicalMaterial({ color:0xcfe6ff, roughness:0.08, metalness:0,
-  transparent:true, opacity:0.16, clearcoat:1, clearcoatRoughness:0.05, envMapIntensity:1.4,
-  depthWrite:false, side:THREE.DoubleSide });
-const matTubeGlow = new THREE.MeshStandardMaterial({ color:0xffffff, emissive:0xffffff, emissiveIntensity:1.35, roughness:0.5 });
-
-/* ============================================================
-   The machine
-   ============================================================ */
-const GY = 2.95;                         // globe centre height
-const R  = 1.72;                         // globe radius
-const BALL_R = 0.225;                    // ball radius (slight artistic upscale for legibility)
-const machine = new THREE.Group(); scene.add(machine);
-
-// --- pedestal / base ---
-const pedestal = new THREE.Group(); machine.add(pedestal);
-const baseBottom = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.7,0.55,64), matWhiteBody);
-baseBottom.position.y = 0.78; baseBottom.castShadow = true; pedestal.add(baseBottom);
-const baseMid = new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.5,0.6,64), matWhiteBody);
-baseMid.position.y = 1.32; baseMid.castShadow = true; pedestal.add(baseMid);
-const baseRing = new THREE.Mesh(new THREE.TorusGeometry(1.06,0.05,16,80), matGold);
-baseRing.rotation.x = Math.PI/2; baseRing.position.y = 1.6; pedestal.add(baseRing);
-// branded plate on the pedestal
-(() => {
-  const c = document.createElement('canvas'); c.width=512; c.height=256;
-  const g = c.getContext('2d'); g.fillStyle='#f4f6fa'; g.fillRect(0,0,512,256);
-  g.fillStyle='#0a0d16'; g.font='800 92px "Microsoft JhengHei",sans-serif'; g.textAlign='center'; g.textBaseline='middle';
-  g.fillText('六合彩', 256, 96);
-  g.fillStyle='#a6192e'; g.font='800 40px "Segoe UI",sans-serif'; g.fillText('M A R K   S I X', 256, 170);
-  g.strokeStyle='#d4af37'; g.lineWidth=6; g.strokeRect(26,26,460,204);
-  const t = new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
-  const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.5,0.75),
-    new THREE.MeshStandardMaterial({ map:t, roughness:0.5, metalness:0.1 }));
-  plate.position.set(0,1.0,1.51); pedestal.add(plate);
-})();
-
-// central spine rising to the globe
-const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.32,1.4,40), matChrome);
-spine.position.y = 2.0; spine.castShadow = true; machine.add(spine);
-
-// --- globe (mixing chamber) ---
-const globe = new THREE.Mesh(new THREE.SphereGeometry(R, 80, 56), matGlass);
-globe.position.y = GY; globe.renderOrder = 4; machine.add(globe);
-
-// metal yoke ring around globe (rotation axis = X)
-const yoke = new THREE.Mesh(new THREE.TorusGeometry(R+0.04, 0.07, 20, 96), matChrome);
-yoke.position.y = GY; yoke.rotation.y = Math.PI/2; machine.add(yoke);   // ring in Y-Z plane (axis X)
-// yoke arms
-[-1,1].forEach(s => {
-  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,1.5,24), matChrome);
-  arm.position.set(s*(R+0.04), GY-0.85, 0); arm.castShadow = true; machine.add(arm);
-  const hub = new THREE.Mesh(new THREE.SphereGeometry(0.16,24,16), matChrome);
-  hub.position.set(s*(R+0.04), GY, 0); machine.add(hub);
-});
-
-// 5th-gen horseshoe LED light rig behind the globe
-const horseshoe = new THREE.Mesh(new THREE.TorusGeometry(R+0.55, 0.085, 20, 120, Math.PI*1.5), matTubeGlow);
-horseshoe.position.set(0, GY, -0.55); horseshoe.rotation.z = -Math.PI*0.75; machine.add(horseshoe);
-
-// rotating group: glass + internal lift column (spins during mixing)
-const spinner = new THREE.Group(); spinner.position.y = GY; machine.add(spinner);
-const column = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.09,R*1.85,24),
-  new THREE.MeshStandardMaterial({ color:0xaab2c0, metalness:1, roughness:0.45 }));
-spinner.add(column);
-const liftCup = new THREE.Mesh(new THREE.CylinderGeometry(BALL_R*1.15, BALL_R*0.7, 0.16, 24, 1, true), matChrome);
-liftCup.position.y = -R*0.78; spinner.add(liftCup);
-
-// top exit dome
-const dome = new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.34,0.3,32), matChrome);
-dome.position.y = GY + R - 0.02; machine.add(dome);
-
-/* --- two lit display tubes (right = 6 main, left = special) --- */
-const TUBE = { x:2.95, bottomY:1.55, h:3.2, rOuter:BALL_R+0.13 };
-function buildTube(sign){
-  const grp = new THREE.Group(); grp.position.set(sign*TUBE.x, 0, 0.15); machine.add(grp);
-  const outer = new THREE.Mesh(new THREE.CylinderGeometry(TUBE.rOuter, TUBE.rOuter, TUBE.h, 48, 1, true),
-    matTubeGlass);
-  outer.position.y = TUBE.bottomY + TUBE.h/2; outer.renderOrder = 3; grp.add(outer);
-  const core = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,TUBE.h,16), matTubeGlow.clone());
-  core.position.y = TUBE.bottomY + TUBE.h/2; grp.add(core);
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(TUBE.rOuter+0.04, TUBE.rOuter+0.06, 0.16, 48), matChrome);
-  cap.position.y = TUBE.bottomY - 0.05; grp.add(cap);
-  const topCap = new THREE.Mesh(new THREE.CylinderGeometry(TUBE.rOuter+0.06, TUBE.rOuter+0.04, 0.14, 48), matChrome);
-  topCap.position.y = TUBE.bottomY + TUBE.h + 0.04; grp.add(topCap);
-  // glow light inside the tube
-  const gl = new THREE.PointLight(0xffffff, 7, 6, 2); gl.position.set(sign*TUBE.x, TUBE.bottomY+TUBE.h*0.4, 0.15);
-  machine.add(gl);
-  return grp;
-}
-buildTube(1); buildTube(-1);
-const labelMat = (txt) => {
-  const c = document.createElement('canvas'); c.width=256;c.height=96; const g=c.getContext('2d');
-  g.fillStyle='rgba(0,0,0,0)'; g.fillRect(0,0,256,96);
-  g.fillStyle='#f0d77a'; g.font='800 34px "Segoe UI",sans-serif'; g.textAlign='center'; g.textBaseline='middle';
-  g.fillText(txt,128,48);
+/* ===== floor + stage + backdrop ===== */
+const floor=new THREE.Mesh(new THREE.CircleGeometry(28,96),new THREE.MeshStandardMaterial({color:0x070a12,roughness:0.2,metalness:0.65}));
+floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+const stage=new THREE.Mesh(new THREE.CylinderGeometry(4.0,4.3,0.5,80),new THREE.MeshStandardMaterial({color:0x0c1020,roughness:0.34,metalness:0.45}));
+stage.position.y=0.25; stage.receiveShadow=true; stage.castShadow=true; scene.add(stage);
+const stageTrim=new THREE.Mesh(new THREE.TorusGeometry(4.02,0.04,16,100),new THREE.MeshStandardMaterial({color:0xd4af37,roughness:0.3,metalness:1,emissive:0x3a2a07,emissiveIntensity:0.6}));
+stageTrim.rotation.x=Math.PI/2; stageTrim.position.y=0.5; scene.add(stageTrim);
+(()=>{ const w=1024,h=640,c=document.createElement('canvas'); c.width=w;c.height=h; const g=c.getContext('2d');
+  const gr=g.createRadialGradient(w/2,h*0.42,80,w/2,h*0.42,760); gr.addColorStop(0,'#16203f'); gr.addColorStop(.5,'#0a1126'); gr.addColorStop(1,'#04060d');
+  g.fillStyle=gr; g.fillRect(0,0,w,h);
+  g.globalAlpha=0.045; g.fillStyle='#cfe0ff'; g.font='800 42px "Microsoft JhengHei",sans-serif'; g.textAlign='center'; g.textBaseline='middle';
+  for(let r=0;r<6;r++)for(let cI=0;cI<4;cI++) g.fillText('六合彩 MARK SIX',(cI+0.5)*(w/4),70+r*((h-160)/5));
+  g.globalAlpha=0.6; g.fillStyle='#d4af37'; g.font='800 30px "Segoe UI",sans-serif'; g.fillText('★  50th ANNIVERSARY · 金禧  ★',w/2,h-34);
   const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
-  return new THREE.SpriteMaterial({ map:t, transparent:true, depthTest:false });
-};
-const lblMain = new THREE.Sprite(labelMat('DRAWN ×6')); lblMain.scale.set(1.05,0.39,1); lblMain.position.set(TUBE.x,TUBE.bottomY+TUBE.h+0.42,0.15); machine.add(lblMain);
-const lblSp = new THREE.Sprite(labelMat('EXTRA')); lblSp.scale.set(1.05,0.39,1); lblSp.position.set(-TUBE.x,TUBE.bottomY+TUBE.h+0.42,0.15); machine.add(lblSp);
+  const wall=new THREE.Mesh(new THREE.PlaneGeometry(46,28),new THREE.MeshStandardMaterial({map:t,roughness:0.95,metalness:0})); wall.position.set(0,10,-17); scene.add(wall); })();
 
-/* ============================================================
-   Balls — geometry, textures, meshes + physics bodies
-   ============================================================ */
-const ballGeo = new THREE.SphereGeometry(BALL_R, 48, 32);
-const texCache = new Map();
-function ballTexture(n){
-  if (texCache.has(n)) return texCache.get(n);
-  const W=512,H=256, c=document.createElement('canvas'); c.width=W;c.height=H;
-  const g=c.getContext('2d'); g.fillStyle=HEX[colourOf(n)]; g.fillRect(0,0,W,H);
-  // two white oval patches on opposite sides with black numerals (like the real balls)
-  for (const cx of [W*0.25, W*0.75]){
-    g.save(); g.translate(cx,H*0.5);
-    g.fillStyle='#fbfaf6'; g.beginPath(); g.ellipse(0,0,72,90,0,0,Math.PI*2); g.fill();
-    g.fillStyle='#1a1a1a'; g.font='800 116px Arial,"Segoe UI",sans-serif';
-    g.textAlign='center'; g.textBaseline='middle'; g.fillText(String(n),0,6);
-    g.restore();
-  }
-  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
-  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  texCache.set(n,t); return t;
-}
+/* ===== materials ===== */
+const matWhite=new THREE.MeshPhysicalMaterial({color:0xe8ebf1,roughness:0.5,metalness:0.1,clearcoat:0.3,clearcoatRoughness:0.4,envMapIntensity:0.7});
+const matChrome=new THREE.MeshStandardMaterial({color:0xd9dee8,roughness:0.22,metalness:1,envMapIntensity:1.3});
+const matGlass=new THREE.MeshPhysicalMaterial({transmission:1,ior:1.46,thickness:0.6,roughness:0.045,metalness:0,clearcoat:1,clearcoatRoughness:0.05,envMapIntensity:1.5,attenuationColor:new THREE.Color(0xeaf3ff),attenuationDistance:6,transparent:true,opacity:1,side:THREE.DoubleSide});
+matGlass.depthWrite=false;
+const matClear=new THREE.MeshPhysicalMaterial({color:0xdfeeff,roughness:0.08,metalness:0,transparent:true,opacity:0.14,clearcoat:1,clearcoatRoughness:0.06,envMapIntensity:1.3,depthWrite:false,side:THREE.DoubleSide});
+const matGlow=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:1.4,roughness:0.5});
 
-// physics world
-const world = new CANNON.World({ gravity:new CANNON.Vec3(0,-9.82,0) });
-world.broadphase = new CANNON.SAPBroadphase(world);
-world.allowSleep = false; world.solver.iterations = 9;
-const pm = new CANNON.Material('ball');
-world.defaultContactMaterial.friction = 0.04;
-world.defaultContactMaterial.restitution = 0.4;
-world.addContactMaterial(new CANNON.ContactMaterial(pm,pm,{ friction:0.03, restitution:0.5 }));
-const GC = new CANNON.Vec3(0, GY, 0);
+/* ===== machine geometry ===== */
+const GY=3.2, R=1.6, BALL_R=0.2, HEAD_Y=5.4;
+const machine=new THREE.Group(); scene.add(machine);
 
-const balls = [];   // {n, mesh, body, displayed}
-const byNum = new Map();
-function randInGlobe(){
-  const u=Math.random(), v=Math.random(), w=Math.random();
-  const r=(R-BALL_R-0.05)*Math.cbrt(Math.random());
-  const th=u*Math.PI*2, ph=Math.acos(2*v-1);
-  return new THREE.Vector3(r*Math.sin(ph)*Math.cos(th), r*Math.sin(ph)*Math.sin(th)+GY, r*Math.cos(ph));
-}
-for (let n=1;n<=49;n++){
-  const mesh = new THREE.Mesh(ballGeo, new THREE.MeshPhysicalMaterial({
-    map:ballTexture(n), roughness:0.16, metalness:0.0, clearcoat:1.0, clearcoatRoughness:0.1, envMapIntensity:1.25
-  }));
-  mesh.castShadow = true; mesh.renderOrder = 2; scene.add(mesh);
-  const p = randInGlobe();
-  const body = new CANNON.Body({ mass:1.2, shape:new CANNON.Sphere(BALL_R), material:pm,
-    linearDamping:0.12, angularDamping:0.25 });
-  body.position.set(p.x,p.y,p.z);
-  body.velocity.set((Math.random()-0.5)*2,(Math.random()-0.5)*2,(Math.random()-0.5)*2);
+// transparent cabinet base + white frame
+const cab=new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.7,1.8,64),matClear); cab.position.y=0.9; machine.add(cab);
+[0.05,0.9,1.78].forEach(yy=>{ const ring=new THREE.Mesh(new THREE.TorusGeometry(yy<0.1?1.7:(yy>1.5?1.35:1.52),0.06,16,80),matWhite); ring.rotation.x=Math.PI/2; ring.position.y=yy; machine.add(ring); });
+const goldBaseRing=new THREE.Mesh(new THREE.TorusGeometry(1.36,0.04,16,80),new THREE.MeshStandardMaterial({color:0xd4af37,roughness:0.3,metalness:1,emissive:0x2a1f05,emissiveIntensity:0.5}));
+goldBaseRing.rotation.x=Math.PI/2; goldBaseRing.position.y=1.82; machine.add(goldBaseRing);
+const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.9,0.4,48),matWhite); neck.position.y=2.0; machine.add(neck);
+
+// mixing chamber (glass sphere)
+const globe=new THREE.Mesh(new THREE.SphereGeometry(R,80,56),matGlass); globe.position.y=GY; globe.renderOrder=4; machine.add(globe);
+const yoke=new THREE.Mesh(new THREE.TorusGeometry(R+0.04,0.07,20,96),matChrome); yoke.position.y=GY; yoke.rotation.y=Math.PI/2; machine.add(yoke);
+[-1,1].forEach(s=>{ const hub=new THREE.Mesh(new THREE.SphereGeometry(0.15,24,16),matChrome); hub.position.set(s*(R+0.04),GY,0); machine.add(hub); });
+
+// 5th-gen horseshoe LED rig behind chamber
+const horseshoe=new THREE.Mesh(new THREE.TorusGeometry(R+0.5,0.08,20,120,Math.PI*1.45),matGlow); horseshoe.position.set(0,GY,-0.5); horseshoe.rotation.z=-Math.PI*0.73; machine.add(horseshoe);
+
+// internal counter-rotating mixing paddles (gravity-mix, not air)
+function paddle(){ const g=new THREE.Group(); const m=new THREE.MeshStandardMaterial({color:0xb7c0d0,metalness:1,roughness:0.4});
+  for(let a=0;a<3;a++){ const arm=new THREE.Mesh(new THREE.BoxGeometry(R*1.7,0.05,0.16),m); arm.rotation.z=a*Math.PI/3; g.add(arm); } return g; }
+const paddleA=paddle(), paddleB=paddle(); paddleA.position.y=GY; paddleB.position.y=GY; paddleB.rotation.x=Math.PI/4; machine.add(paddleA,paddleB);
+const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,R*2,16),matChrome); axle.rotation.z=Math.PI/2; axle.position.y=GY; machine.add(axle);
+
+// central lift rod (rises during a pick)
+const rod=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.08,1.6,20),new THREE.MeshStandardMaterial({color:0xaab2c0,metalness:1,roughness:0.45}));
+const ROD_REST=GY-R+0.6; rod.position.y=ROD_REST; machine.add(rod);
+
+// central glowing lift TUBE up to the display head (the white "lightsaber")
+const liftTube=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,(HEAD_Y-(GY+R-0.2)),24,1,true),matClear);
+liftTube.position.y=(GY+R-0.2+HEAD_Y)/2; machine.add(liftTube);
+const liftCore=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,(HEAD_Y-(GY+R-0.2)),16),matGlow);
+liftCore.position.y=liftTube.position.y; machine.add(liftCore);
+
+// top display head: hub + left rack (6) + right holder (1)
+const head=new THREE.Group(); head.position.y=HEAD_Y; machine.add(head);
+const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.26,0.22,32),matChrome); head.add(hub);
+function tray(x0,x1){ const len=Math.abs(x1-x0)+0.5; const mid=(x0+x1)/2;
+  const t=new THREE.Mesh(new THREE.BoxGeometry(len,0.12,0.5),matWhite); t.position.set(mid,-0.22,0.15); head.add(t);
+  const g=new THREE.Mesh(new THREE.BoxGeometry(len,0.34,0.46),matClear); g.position.set(mid,-0.02,0.15); head.add(g); }
+function mainSlot(i){ return new THREE.Vector3(-0.7-i*0.46,HEAD_Y,0.15); }
+function extraSlot(){ return new THREE.Vector3(0.95,HEAD_Y,0.15); }
+tray(-0.7,-0.7-5*0.46); tray(0.95,0.95);
+function sprite(txt,col){ const c=document.createElement('canvas'); c.width=256;c.height=72; const g=c.getContext('2d');
+  g.fillStyle=col; g.font='800 30px "Segoe UI","Microsoft JhengHei",sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(txt,128,40);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false})); s.scale.set(2,0.56,1); return s; }
+const lblMain=sprite('正獎 · 6 NUMBERS','#f0d77a'); lblMain.position.set(-1.85,HEAD_Y+0.5,0.15); machine.add(lblMain);
+const lblEx=sprite('特別 · EXTRA','#f0d77a'); lblEx.position.set(0.95,HEAD_Y+0.5,0.15); machine.add(lblEx);
+
+/* ===== balls ===== */
+const ballGeo=new THREE.SphereGeometry(BALL_R,48,32);
+const texCache=new Map();
+function ballTexture(n){ if(texCache.has(n))return texCache.get(n);
+  const W=512,H=256,c=document.createElement('canvas'); c.width=W;c.height=H; const g=c.getContext('2d');
+  g.fillStyle=HEX[colourOf(n)]; g.fillRect(0,0,W,H);
+  // white underlined number repeated ~12x around the ball (like the real balls)
+  g.fillStyle='#ffffff'; g.strokeStyle='#ffffff'; g.textAlign='center'; g.textBaseline='middle';
+  const cols=4, rows=3; const s=String(n);
+  for(let r=0;r<rows;r++)for(let cI=0;cI<cols;cI++){ const x=(cI+0.5)*(W/cols), y=(r+0.5)*(H/rows);
+    g.font='800 62px Arial,"Segoe UI",sans-serif'; g.fillText(s,x,y);
+    const tw=g.measureText(s).width; g.lineWidth=5; g.beginPath(); g.moveTo(x-tw/2-3,y+30); g.lineTo(x+tw/2+3,y+30); g.stroke(); }
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=renderer.capabilities.getMaxAnisotropy();
+  texCache.set(n,t); return t; }
+
+const world=new CANNON.World({gravity:new CANNON.Vec3(0,-9.82,0)});
+world.broadphase=new CANNON.SAPBroadphase(world); world.allowSleep=false; world.solver.iterations=9;
+const pm=new CANNON.Material('ball'); world.defaultContactMaterial.friction=0.05; world.defaultContactMaterial.restitution=0.32;
+world.addContactMaterial(new CANNON.ContactMaterial(pm,pm,{friction:0.04,restitution:0.4}));
+const GC=new CANNON.Vec3(0,GY,0);
+
+function rackSlot(i){ const c=i%10, r=Math.floor(i/10); const rowLen=i<40?10:9; const x=(c-(rowLen-1)/2)*0.42; return new THREE.Vector3(x,6.5-r*0.42,-1.05); }
+const balls=[], byNum=new Map();
+for(let n=1;n<=49;n++){
+  const mesh=new THREE.Mesh(ballGeo,new THREE.MeshPhysicalMaterial({map:ballTexture(n),roughness:0.46,metalness:0,clearcoat:0.22,clearcoatRoughness:0.4,envMapIntensity:0.9}));
+  mesh.castShadow=true; mesh.renderOrder=2; scene.add(mesh);
+  const body=new CANNON.Body({mass:1.2,shape:new CANNON.Sphere(BALL_R),material:pm,linearDamping:0.12,angularDamping:0.28,type:CANNON.Body.STATIC});
   world.addBody(body);
-  const entry = { n, mesh, body, displayed:false };
-  balls.push(entry); byNum.set(n, entry);
+  const e={n,mesh,body,state:'rack'}; balls.push(e); byNum.set(n,e);
 }
 
-/* ============================================================
-   Sound (WebAudio synth — no assets)
-   ============================================================ */
-let actx=null, soundOn=true;
-function audio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
-function whoosh(){
-  const a=audio(); if(!a||!soundOn) return;
-  const n=a.createBufferSource(), b=a.createBuffer(1,a.sampleRate*0.5,a.sampleRate), d=b.getChannelData(0);
-  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
-  n.buffer=b; const f=a.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(500,a.currentTime);
-  f.frequency.exponentialRampToValueAtTime(2600,a.currentTime+0.4); f.Q.value=1.2;
-  const g=a.createGain(); g.gain.setValueAtTime(0.18,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.5);
-  n.connect(f); f.connect(g); g.connect(a.destination); n.start();
-}
-function ding(freq=880){
-  const a=audio(); if(!a||!soundOn) return;
-  const o=a.createOscillator(), g=a.createGain(); o.type='triangle'; o.frequency.value=freq;
-  g.gain.setValueAtTime(0.0001,a.currentTime); g.gain.exponentialRampToValueAtTime(0.25,a.currentTime+0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+0.6);
-  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+0.62);
-}
-function fanfare(){
-  const a=audio(); if(!a||!soundOn) return;
-  [523,659,784,1046].forEach((f,i)=>{ setTimeout(()=>ding(f), i*110); });
-}
+/* ===== sound ===== */
+let actx=null,soundOn=true;
+function audio(){ if(!actx){ try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } return actx; }
+function whoosh(){ const a=audio(); if(!a||!soundOn)return; const n=a.createBufferSource(),b=a.createBuffer(1,a.sampleRate*0.6,a.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2); n.buffer=b;
+  const f=a.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(420,a.currentTime); f.frequency.exponentialRampToValueAtTime(2200,a.currentTime+0.5); f.Q.value=1.1;
+  const g=a.createGain(); g.gain.setValueAtTime(0.14,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.6);
+  n.connect(f); f.connect(g); g.connect(a.destination); n.start(); }
+function ding(freq=820){ const a=audio(); if(!a||!soundOn)return; const o=a.createOscillator(),g=a.createGain(); o.type='triangle'; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,a.currentTime); g.gain.exponentialRampToValueAtTime(0.22,a.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+0.6);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+0.62); }
+function rumble(on){ /* short mix swell */ const a=audio(); if(!a||!soundOn)return; }
+function fanfare(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>ding(f),i*120)); }
 
-/* ============================================================
-   Draw state machine
-   ============================================================ */
-let phase='idle';            // idle | mixing | drawing | done
-let mixT=0; const MIX_TIME=3.6;
-let drawData=null;           // { main:[6], special }
-let queue=[]; let flying=null; let gapT=0;
-let mainSlot=0;              // next slot in right tube
-const drawnChips=[];
+/* ===== tween system ===== */
+const easeIn=u=>u*u, easeInOut=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+const tweens=[];
+function addTween(mesh,points,dur,opts={}){ tweens.push({mesh,curve:new THREE.CatmullRomCurve3(points,false,'catmullrom',0.5),t:0,dur,delay:opts.delay||0,spin:opts.spin||0,ease:opts.ease||easeInOut,onDone:opts.onDone}); }
 
-function pickDraw(){
-  const pool=[]; for(let i=1;i<=49;i++) pool.push(i);
-  for(let i=pool.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [pool[i],pool[j]]=[pool[j],pool[i]]; }
-  const seven=pool.slice(0,7);
-  return { main:seven.slice(0,6), special:seven[6] };
-}
-function slotPos(sign, i){ // world pos of stacked ball in a tube
-  return new THREE.Vector3(sign*TUBE.x, TUBE.bottomY + BALL_R + 0.06 + i*(BALL_R*2+0.03), 0.15);
-}
-function startDraw(){
-  if (phase==='mixing'||phase==='drawing') return;
-  resetBalls(false);
-  audio(); if(actx && actx.state==='suspended') actx.resume();
-  drawData=pickDraw(); phase='mixing'; mixT=0; controls.autoRotate=false;
-  document.getElementById('result').classList.remove('show');
+/* ===== draw state machine ===== */
+let phase='staged';                 // staged | dropping | mixing | drawing | done
+let mixT=0, churn=0, gapT=0;
+let drawData=null, queue=[], flying=null, rodT=0;
+const MIX_TIME=7.0, DROP_DUR=0.95, REMIX_GAP=1.4, LIFT_DUR=2.4;
+
+function settlePoint(){ const a=Math.random()*Math.PI*2, ph=Math.acos(Math.random()*0.8+0.1); const rr=(R-BALL_R-0.1)*Math.cbrt(Math.random());
+  return new THREE.Vector3(rr*Math.sin(ph)*Math.cos(a), GY-Math.abs(rr*Math.cos(ph))*0.7, rr*Math.sin(ph)*Math.sin(a)); }
+
+function stageBalls(){ tweens.length=0; flying=null; queue=[];
+  balls.forEach((e,i)=>{ e.state='rack'; e.body.type=CANNON.Body.STATIC; e.body.velocity.setZero(); e.body.angularVelocity.setZero();
+    const p=rackSlot(i); e.mesh.position.copy(p); e.body.position.set(p.x,p.y,p.z); e.mesh.quaternion.set(0,0,0,1); });
   document.getElementById('r-main').innerHTML=''; document.getElementById('r-extra').innerHTML='';
-  document.getElementById('draw').disabled=true;
-  document.getElementById('hint').textContent='Mixing the 49 balls…';
-}
-function beginExtraction(){
-  phase='drawing';
-  queue = drawData.main.map(n=>({n,sign:1})).concat([{n:drawData.special,sign:-1}]);
-  mainSlot=0; gapT=0;
-}
-function launchBall(item){
-  const e = byNum.get(item.n); e.displayed=true;
-  e.body.type = CANNON.Body.STATIC; e.body.collisionResponse=false; e.body.velocity.setZero();
-  const start = e.mesh.position.clone();
-  const slot = item.sign>0 ? mainSlot : 0;
-  const dest = slotPos(item.sign, slot);
-  const pts = [
-    start,
-    new THREE.Vector3(0, GY - R*0.5, 0),            // dip to lift cup
-    new THREE.Vector3(0, GY + R + 0.25, 0),          // up the column, out the top
-    new THREE.Vector3(item.sign*TUBE.x*0.62, GY + R + 0.65, 0.1), // arc over toward the tube
-    new THREE.Vector3(item.sign*TUBE.x, TUBE.bottomY+TUBE.h-0.1, 0.15), // enter tube top
-    dest
-  ];
-  const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.4);
-  flying = { e, curve, t:0, dur:1.45, item, slot };
-  whoosh();
-}
-function landBall(){
-  const { e, item, slot } = flying;
-  e.mesh.position.copy(slotPos(item.sign, item.sign>0?slot:0));
-  ding(item.sign>0 ? 660+slot*55 : 1040);
-  // live chip
-  if (item.sign>0){ addChip('r-main', item.n); mainSlot++; }
-  else addChip('r-extra', item.n);
-  document.getElementById('result').classList.add('show');
-  flying=null; gapT=0;
-}
-function addChip(rowId, n){
-  const d=document.createElement('div'); d.className='chip '+colourOf(n);
-  const s=document.createElement('span'); s.textContent=n; d.appendChild(s);
-  document.getElementById(rowId).appendChild(d);
-}
-function finishDraw(){
-  phase='done'; fanfare();
-  // official display: sort the six ascending
-  const row=document.getElementById('r-main'); row.innerHTML='';
-  [...drawData.main].sort((a,b)=>a-b).forEach(n=>addChip('r-main',n));
-  document.getElementById('draw').disabled=false;
-  document.getElementById('hint').textContent='6 drawn numbers (sorted) + 1 extra · drag to orbit';
-  controls.autoRotate=true;
-}
-function resetBalls(toIdle=true){
-  balls.forEach(e=>{
-    e.displayed=false; e.body.type=CANNON.Body.DYNAMIC; e.body.collisionResponse=true;
-    const p=randInGlobe(); e.body.position.set(p.x,p.y,p.z);
-    e.body.velocity.set((Math.random()-0.5)*3,(Math.random()-0.5)*3,(Math.random()-0.5)*3);
-    e.body.angularVelocity.set(0,0,0);
-  });
-  flying=null; queue=[]; mainSlot=0;
-  if (toIdle){ phase='idle';
-    document.getElementById('result').classList.remove('show');
-    document.getElementById('r-main').innerHTML=''; document.getElementById('r-extra').innerHTML='';
-    document.getElementById('hint').textContent='drag to orbit · scroll to zoom';
-    document.getElementById('draw').disabled=false; controls.autoRotate=true;
-  }
-}
+  document.getElementById('result').classList.remove('show'); }
 
-/* ============================================================
-   Post-processing (HDR multisampled composer + bloom)
-   ============================================================ */
-const rt = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type:THREE.HalfFloatType, samples:4 });
-const composer = new EffectComposer(renderer, rt);
-composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight), settings.glow, settings.glowSpread, settings.glowThreshold);
-composer.addPass(bloom);
-composer.addPass(new OutputPass());
+function pickDraw(){ const pool=[]; for(let i=1;i<=49;i++)pool.push(i);
+  for(let i=pool.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  return {main:pool.slice(0,6),special:pool[6]}; }
 
-addEventListener('resize', ()=>{
-  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight);
-});
+function startDraw(){ if(phase==='dropping'||phase==='mixing'||phase==='drawing')return;
+  audio(); if(actx&&actx.state==='suspended')actx.resume();
+  stageBalls(); drawData=pickDraw(); phase='dropping'; mixT=0; churn=0;
+  controls.autoRotate=false; document.getElementById('draw').disabled=true;
+  document.getElementById('hint').textContent='Releasing 49 balls into the chamber…';
+  // staggered drop tweens through the top into the chamber
+  balls.forEach((e,i)=>{ e.state='tween'; const from=rackSlot(i);
+    addTween(e.mesh,[from,new THREE.Vector3(from.x*0.25,GY+R-0.15,0),new THREE.Vector3((Math.random()-0.5)*0.5,GY+0.3,0),settlePoint()],DROP_DUR,
+      {delay:i*0.03,ease:easeIn,onDone:()=>{ e.state='live'; e.body.type=CANNON.Body.DYNAMIC; e.body.position.set(e.mesh.position.x,e.mesh.position.y,e.mesh.position.z);
+        e.body.velocity.set((Math.random()-0.5)*1.2,-1.5,(Math.random()-0.5)*1.2); }}); });
+  whoosh(); }
 
-/* ============================================================
-   Main loop
-   ============================================================ */
-const clock = new THREE.Clock();
-const rel = new CANNON.Vec3();
-let accumulator=0;
-let paused=false;
-window.__pause=()=>{paused=true;};
-window.__resume=()=>{ if(paused){ paused=false; clock.getDelta(); animate(); } };
+function beginMixing(){ phase='mixing'; mixT=0; document.getElementById('hint').textContent='Mixing the balls…'; }
+function beginExtraction(){ phase='drawing'; queue=drawData.main.map(n=>({n,type:'main'})).concat([{n:drawData.special,type:'extra'}]); gapT=0; }
 
-function physicsStep(dt){
-  // mixing forces — swirl about X axis + lift + jitter (bidirectional, sinusoidal)
-  if (phase==='mixing'){
-    const k = 30*Math.sin(mixT*1.7);
-    for (const e of balls){ if(e.displayed) continue; const b=e.body;
-      b.position.vsub(GC, rel);
-      const tx=0, ty=-rel.z, tz=rel.y;                  // X-axis × rel
-      b.applyForce(new CANNON.Vec3(
-        k*tx + (Math.random()-0.5)*10,
-        9.82*1.2*1.18 + k*ty*0.35 + (Math.random()-0.5)*10,
-        k*tz + (Math.random()-0.5)*10), b.position);
-    }
-  }
-  world.step(1/60, dt, 3);
-  // analytic spherical containment + velocity clamp
-  for (const e of balls){ if(e.displayed) continue; const b=e.body;
-    b.position.vsub(GC, rel); const d=rel.length(); const maxD=R-BALL_R-0.012;
-    if (d>maxD){ const nx=rel.x/d, ny=rel.y/d, nz=rel.z/d;
-      b.position.set(GC.x+nx*maxD, GC.y+ny*maxD, GC.z+nz*maxD);
-      const vn=b.velocity.x*nx+b.velocity.y*ny+b.velocity.z*nz;
-      if (vn>0){ const r=0.5; b.velocity.x-=(1+r)*vn*nx; b.velocity.y-=(1+r)*vn*ny; b.velocity.z-=(1+r)*vn*nz; }
-    }
-    const sp=b.velocity.length(); if(sp>16) b.velocity.scale(16/sp,b.velocity);
-  }
-}
+function launchBall(item){ const e=byNum.get(item.n); e.state='tween'; e.body.type=CANNON.Body.STATIC; e.body.velocity.setZero();
+  const mainCount=document.getElementById('r-main').children.length;
+  const dest=item.type==='main'?mainSlot(mainCount):extraSlot();
+  const pts=[ e.mesh.position.clone(), new THREE.Vector3(0,GY-R+0.4,0), new THREE.Vector3(0,GY+0.2,0),
+    new THREE.Vector3(0,GY+R-0.05,0), new THREE.Vector3(0,HEAD_Y-0.15,0.05), dest ];
+  flying=e; rodT=0;
+  addTween(e.mesh,pts,LIFT_DUR,{spin:2,onDone:()=>{ e.state='display'; e.mesh.position.copy(dest);
+    ding(item.type==='main'?640+mainCount*55:1046); addChip(item.type==='main'?'r-main':'r-extra',item.n);
+    document.getElementById('result').classList.add('show'); flying=null; gapT=0; }});
+  whoosh(); }
+
+function addChip(rowId,n){ const d=document.createElement('div'); d.className='chip '+colourOf(n); const u=document.createElement('u'); u.textContent=n; d.appendChild(u); document.getElementById(rowId).appendChild(d); }
+
+function finishDraw(){ phase='done'; fanfare();
+  const row=document.getElementById('r-main'); row.innerHTML=''; [...drawData.main].sort((a,b)=>a-b).forEach(n=>addChip('r-main',n));
+  document.getElementById('draw').disabled=false; document.getElementById('hint').textContent='正獎 6 (sorted) + 特別號碼 · drag to orbit';
+  controls.autoRotate=true; }
+
+function resetAll(){ phase='staged'; stageBalls(); churn=0;
+  document.getElementById('draw').disabled=false; document.getElementById('hint').textContent='press START DRAW · drag to orbit'; controls.autoRotate=true; }
+
+/* ===== post ===== */
+const rt=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.HalfFloatType,samples:4});
+const composer=new EffectComposer(renderer,rt);
+composer.addPass(new RenderPass(scene,camera));
+const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),settings.glow,settings.glowSpread,settings.glowThreshold);
+composer.addPass(bloom); composer.addPass(new OutputPass());
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); });
+
+/* ===== loop ===== */
+const clock=new THREE.Clock(); const rel=new CANNON.Vec3(); let accumulator=0; let paused=false;
+window.__pause=()=>{paused=true;}; window.__resume=()=>{ if(paused){paused=false; clock.getDelta(); animate();} };
+
+function mixForce(strength){ for(const e of balls){ if(e.state!=='live')continue; const b=e.body; b.position.vsub(GC,rel);
+  const k=strength*Math.sin(churn*0.9); b.applyForce(new CANNON.Vec3(k*0+(Math.random()-0.5)*5, 9.82*1.2*1.05+(-rel.z)*k*0.3+(Math.random()-0.5)*5, rel.y*k+(Math.random()-0.5)*5), b.position); } }
+function physicsStep(dt){ world.step(1/60,dt,3);
+  for(const e of balls){ if(e.state!=='live')continue; const b=e.body; b.position.vsub(GC,rel); const d=rel.length(), maxD=R-BALL_R-0.012;
+    if(d>maxD){ const nx=rel.x/d,ny=rel.y/d,nz=rel.z/d; b.position.set(GC.x+nx*maxD,GC.y+ny*maxD,GC.z+nz*maxD);
+      const vn=b.velocity.x*nx+b.velocity.y*ny+b.velocity.z*nz; if(vn>0){ const r=0.4; b.velocity.x-=(1+r)*vn*nx; b.velocity.y-=(1+r)*vn*ny; b.velocity.z-=(1+r)*vn*nz; } }
+    const sp=b.velocity.length(); if(sp>13) b.velocity.scale(13/sp,b.velocity); } }
 
 function update(dt){
-  // fixed-step physics
-  accumulator+=dt; let steps=0;
-  while(accumulator>=1/60 && steps<3){ physicsStep(1/60); accumulator-=1/60; steps++; }
+  const sdt=dt*settings.animSpeed;
+  // physics (real dt for stability)
+  accumulator+=dt; let st=0; while(accumulator>=1/60&&st<3){ if(phase==='mixing'||(phase==='drawing'&&!flying)){ churn+=1/60; mixForce(13); } physicsStep(1/60); accumulator-=1/60; st++; }
 
-  // phase progression
-  if (phase==='mixing'){ mixT+=dt; spinner.rotation.x += Math.sin(mixT*1.7)*dt*2.6;
-    if (mixT>=MIX_TIME){ document.getElementById('hint').textContent='Drawing 7 balls…'; beginExtraction(); } }
-  else { spinner.rotation.x *= (1-dt*2); }
+  // tweens (animation-speed scaled)
+  for(let i=tweens.length-1;i>=0;i--){ const tw=tweens[i]; if(tw.delay>0){ tw.delay-=sdt; continue; }
+    tw.t+=sdt/tw.dur; const u=Math.min(tw.t,1); tw.mesh.position.copy(tw.curve.getPoint(tw.ease(u))); if(tw.spin) tw.mesh.rotation.y+=sdt*tw.spin;
+    if(tw.t>=1){ if(tw.onDone)tw.onDone(); tweens.splice(i,1); } }
 
-  if (phase==='drawing' && !flying){
-    gapT+=dt;
-    if (queue.length && gapT>0.35) launchBall(queue.shift());
-    else if (!queue.length) finishDraw();
-  }
+  // phase transitions
+  if(phase==='dropping' && tweens.length===0 && balls.every(e=>e.state==='live')) beginMixing();
+  else if(phase==='mixing'){ mixT+=sdt; if(mixT>=MIX_TIME){ document.getElementById('hint').textContent='Drawing 6 + 1 special…'; beginExtraction(); } }
+  else if(phase==='drawing' && !flying){ gapT+=sdt; if(queue.length&&gapT>REMIX_GAP) launchBall(queue.shift()); else if(!queue.length) finishDraw(); }
 
-  // sync dynamic balls from physics
-  for (const e of balls){ if(e.displayed) continue;
-    e.mesh.position.set(e.body.position.x,e.body.position.y,e.body.position.z);
-    e.mesh.quaternion.set(e.body.quaternion.x,e.body.quaternion.y,e.body.quaternion.z,e.body.quaternion.w);
-  }
-  // advance flying ball
-  if (flying){ flying.t += dt/flying.dur;
-    const u=Math.min(flying.t,1), ease=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
-    flying.e.mesh.position.copy(flying.curve.getPoint(ease));
-    flying.e.mesh.rotation.y += dt*6;
-    if (flying.t>=1) landBall();
-  }
-  // gently spin displayed balls so numbers stay readable
-  for (const e of balls){ if(e.displayed && (!flying||flying.e!==e)) e.mesh.rotation.y += dt*0.7; }
+  // paddles + rod + glow
+  const mixing=(phase==='mixing'||(phase==='drawing'&&!flying));
+  const pdir=Math.sin(churn*0.9); paddleA.rotation.x+=sdt*1.3*(mixing?1:0.04)*Math.sign(pdir||1); paddleB.rotation.x-=sdt*1.3*(mixing?1:0.04)*Math.sign(pdir||1);
+  if(flying){ rodT=Math.min(rodT+sdt/(LIFT_DUR*0.45),1); rod.position.y=ROD_REST+Math.sin(Math.min(rodT,1)*Math.PI)*0.9; } else rod.position.y+= (ROD_REST-rod.position.y)*Math.min(1,dt*4);
+  matGlow.emissiveIntensity=settings.rigGlow+Math.sin(clock.elapsedTime*2)*0.1;
 
-  matTubeGlow.emissiveIntensity = settings.rigGlow + Math.sin(clock.elapsedTime*2)*0.12;
+  // sync live balls
+  for(const e of balls){ if(e.state!=='live')continue; e.mesh.position.set(e.body.position.x,e.body.position.y,e.body.position.z); e.mesh.quaternion.set(e.body.quaternion.x,e.body.quaternion.y,e.body.quaternion.z,e.body.quaternion.w); }
+  // gentle spin on displayed balls
+  for(const e of balls){ if(e.state==='display') e.mesh.rotation.y+=sdt*0.6; }
+
   controls.update();
 }
-function render(){ if (window.__lite) renderer.render(scene,camera); else composer.render(); }
-function animate(){
-  if(paused) return;
-  requestAnimationFrame(animate);
-  update(Math.min(clock.getDelta(),0.033));
-  render();
-}
-// headless test/debug hooks (work even when the tab is hidden & rAF is paused)
-window.__sim = {
-  step:(n=1,dt=1/60)=>{ for(let i=0;i<n;i++) update(dt); return window.__sim.state(); },
-  draw:()=>{ startDraw(); return 'drawing'; },
-  reset:()=>{ resetBalls(true); return 'reset'; },
-  state:()=>({ phase, mixT:+mixT.toFixed(2), flying:!!flying, queue:queue.length,
-    main: drawData ? [...drawData.main] : null, special: drawData ? drawData.special : null }),
-  table:()=>({ red:RED.length, blue:BLUE.length, green:GREEN.length,
-    total:RED.length+BLUE.length+GREEN.length, colourOf:[1,18,49].map(colourOf) })
-};
+function render(){ if(window.__lite) renderer.render(scene,camera); else composer.render(); }
+function animate(){ if(paused)return; requestAnimationFrame(animate); update(Math.min(clock.getDelta(),0.033)); render(); }
 
-/* ============================================================
-   UI wiring
-   ============================================================ */
-document.getElementById('draw').addEventListener('click', startDraw);
-document.getElementById('reset').addEventListener('click', ()=>resetBalls(true));
-document.getElementById('sound').addEventListener('click', e=>{
-  soundOn=!soundOn; audio(); if(actx&&actx.state==='suspended') actx.resume();
-  e.target.textContent = soundOn ? '♪ SOUND ON' : '♪ SOUND OFF';
-});
+// headless hooks (work when tab is hidden / rAF paused)
+window.__sim={ step:(n=1,dt=1/60)=>{ for(let i=0;i<n;i++)update(dt); return window.__sim.state(); },
+  draw:()=>{ startDraw(); return 'drawing'; }, reset:()=>{ resetAll(); return 'reset'; },
+  state:()=>({phase,mixT:+mixT.toFixed(2),live:balls.filter(e=>e.state==='live').length,disp:balls.filter(e=>e.state==='display').length,tweens:tweens.length,flying:!!flying,queue:queue.length,main:drawData?[...drawData.main]:null,special:drawData?drawData.special:null}),
+  table:()=>({red:RED.length,blue:BLUE.length,green:GREEN.length,total:RED.length+BLUE.length+GREEN.length}) };
 
-/* ---- Scene Controls panel ---- */
-function applySetting(k){
-  if (k==='glow') bloom.strength = settings.glow;
-  else if (k==='glowThreshold') bloom.threshold = settings.glowThreshold;
-  else if (k==='glowSpread') bloom.radius = settings.glowSpread;
-  else if (k==='exposure') renderer.toneMappingExposure = settings.exposure;
-  else if (k==='keyLight') key.intensity = settings.keyLight;
-  else if (k==='reflections' && 'environmentIntensity' in scene) scene.environmentIntensity = settings.reflections;
-  // rigGlow is read every frame in update()
-}
-const CTRLS = [
-  { k:'glow',          name:'Glow Intensity', min:0,   max:0.8, step:0.01 },
-  { k:'glowThreshold', name:'Glow Threshold', min:0,   max:1,   step:0.01 },
-  { k:'glowSpread',    name:'Glow Spread',    min:0,   max:1.2, step:0.01 },
-  { k:'rigGlow',       name:'Tube / Rig Glow',min:0,   max:2.5, step:0.05 },
-  { k:'exposure',      name:'Exposure',       min:0.4, max:1.5, step:0.01 },
-  { k:'keyLight',      name:'Key Light',      min:0,   max:200, step:1 },
-  { k:'reflections',   name:'Reflections',    min:0,   max:2,   step:0.05 },
-];
-const panelBody = document.getElementById('panelBody');
-CTRLS.forEach(c=>{
-  const wrap=document.createElement('div'); wrap.className='ctl';
-  wrap.innerHTML = `<label><span>${c.name}</span><b id="v-${c.k}"></b></label>`+
-    `<input type="range" id="s-${c.k}" min="${c.min}" max="${c.max}" step="${c.step}">`;
-  panelBody.appendChild(wrap);
-  const inp=wrap.querySelector('input'), out=wrap.querySelector('b');
-  c.sync=()=>{ const v=settings[c.k]; out.textContent=(c.step<1?v.toFixed(2):Math.round(v));
-    inp.value=v; inp.style.setProperty('--p', ((v-c.min)/(c.max-c.min)*100)+'%'); };
-  inp.addEventListener('input', ()=>{ settings[c.k]=parseFloat(inp.value); applySetting(c.k); c.sync(); });
-  c.sync();
-});
-document.getElementById('scenebtn').addEventListener('click', ()=>document.getElementById('panel').classList.toggle('show'));
-document.getElementById('panelClose').addEventListener('click', ()=>document.getElementById('panel').classList.remove('show'));
-document.getElementById('resetScene').addEventListener('click', ()=>{
-  Object.assign(settings, DEFAULTS); CTRLS.forEach(c=>{ applySetting(c.k); c.sync(); });
-});
+/* ===== UI ===== */
+document.getElementById('draw').addEventListener('click',startDraw);
+document.getElementById('reset').addEventListener('click',resetAll);
+document.getElementById('sound').addEventListener('click',e=>{ soundOn=!soundOn; audio(); if(actx&&actx.state==='suspended')actx.resume(); e.target.textContent=soundOn?'♪ SOUND ON':'♪ SOUND OFF'; });
 
-// settle the balls, then reveal
-setTimeout(()=>document.getElementById('load').classList.add('hide'), 900);
+function applySetting(k){ if(k==='glow')bloom.strength=settings.glow; else if(k==='glowThreshold')bloom.threshold=settings.glowThreshold;
+  else if(k==='glowSpread')bloom.radius=settings.glowSpread; else if(k==='exposure')renderer.toneMappingExposure=settings.exposure;
+  else if(k==='keyLight')key.intensity=settings.keyLight; else if(k==='reflections'&&'environmentIntensity' in scene)scene.environmentIntensity=settings.reflections; }
+const CTRLS=[ {k:'animSpeed',name:'Animation Speed',min:0.5,max:2.5,step:0.05},
+  {k:'glow',name:'Glow Intensity',min:0,max:0.8,step:0.01},{k:'glowThreshold',name:'Glow Threshold',min:0,max:1,step:0.01},
+  {k:'glowSpread',name:'Glow Spread',min:0,max:1.2,step:0.01},{k:'rigGlow',name:'Tube / Rig Glow',min:0,max:2.5,step:0.05},
+  {k:'exposure',name:'Exposure',min:0.4,max:1.5,step:0.01},{k:'keyLight',name:'Key Light',min:0,max:200,step:1},
+  {k:'reflections',name:'Reflections',min:0,max:2,step:0.05} ];
+const panelBody=document.getElementById('panelBody');
+CTRLS.forEach(c=>{ const wrap=document.createElement('div'); wrap.className='ctl';
+  wrap.innerHTML=`<label><span>${c.name}</span><b id="v-${c.k}"></b></label><input type="range" id="s-${c.k}" min="${c.min}" max="${c.max}" step="${c.step}">`;
+  panelBody.appendChild(wrap); const inp=wrap.querySelector('input'),out=wrap.querySelector('b');
+  c.sync=()=>{ const v=settings[c.k]; out.textContent=(c.step<1?v.toFixed(2):Math.round(v)); inp.value=v; inp.style.setProperty('--p',((v-c.min)/(c.max-c.min)*100)+'%'); };
+  inp.addEventListener('input',()=>{ settings[c.k]=parseFloat(inp.value); applySetting(c.k); c.sync(); }); c.sync(); });
+document.getElementById('scenebtn').addEventListener('click',()=>document.getElementById('panel').classList.toggle('show'));
+document.getElementById('panelClose').addEventListener('click',()=>document.getElementById('panel').classList.remove('show'));
+document.getElementById('resetScene').addEventListener('click',()=>{ Object.assign(settings,DEFAULTS); CTRLS.forEach(c=>{applySetting(c.k);c.sync();}); });
+
+stageBalls();
+setTimeout(()=>document.getElementById('load').classList.add('hide'),900);
 animate();
-console.log('Mark Six 3D ready · THREE', THREE.REVISION);
+console.log('Mark Six 3D v2 ready · THREE',THREE.REVISION);
 </script>
 </body>
 </html>
